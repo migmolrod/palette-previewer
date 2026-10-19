@@ -1,2 +1,60 @@
 <h2>Accent</h2>
-<p>Pick an accent color to generate the 16 ANSI colors.</p>
+
+<section aria-labelledby="accent-heading">
+  <h3 id="accent-heading">Accent color</h3>
+  <div class="accent-input">
+    <!-- PrimeNG ColorPicker is not screen-reader accessible; the text field is the accessible path. -->
+    <p-colorpicker
+      aria-hidden="true"
+      [ngModel]="store.accentHex()"
+      (ngModelChange)="store.setAccent($event)"
+    />
+    <label for="accent-hex">Hex or any CSS color</label>
+    <input
+      pInputText
+      id="accent-hex"
+      [value]="store.accentHex()"
+      [invalid]="hexInvalid()"
+      [attr.aria-invalid]="hexInvalid()"
+      aria-describedby="accent-hex-help"
+      (change)="setAccentFromText($any($event.target).value)"
+    />
+    <small id="accent-hex-help">e.g. #7aa2f7 or oklch(0.7 0.15 260)</small>
+  </div>
+</section>
+
+<section aria-labelledby="terminal-heading">
+  <h3 id="terminal-heading">Terminal palette</h3>
+  <app-terminal-preview [palette]="store.result().palette" />
+  <div class="swatches ansi">
+    <app-swatch label="background" [color]="store.result().palette.background" />
+    <app-swatch label="foreground" [color]="store.result().palette.foreground" />
+    @for (slot of ansi; track slot.id) {
+      <app-swatch [label]="slot.id + ' · ' + slot.name" [color]="store.result().palette[slot.id]" />
+    }
+  </div>
+</section>
+
+<section aria-labelledby="ramps-heading">
+  <h3 id="ramps-heading">Ramps</h3>
+  <h4>Accent</h4>
+  <div class="swatches ramp">
+    @for (stop of stops; track stop) {
+      <app-swatch [label]="'' + stop" [color]="store.result().accentRamp[stop]" />
+    }
+  </div>
+  <h4>Neutral</h4>
+  <div class="swatches ramp">
+    @for (stop of stops; track stop) {
+      <app-swatch [label]="'' + stop" [color]="store.result().neutralRamp[stop]" />
+    }
+  </div>
+  @for (hue of hueNames; track hue) {
+    <h4>{{ hue }}</h4>
+    <div class="swatches ramp">
+      @for (stop of stops; track stop) {
+        <app-swatch [label]="'' + stop" [color]="store.result().hueRamps[hue][stop]" />
+      }
+    </div>
+  }
+</section>
