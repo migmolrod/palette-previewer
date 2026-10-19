@@ -1,1 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
+@use 'primeicons/primeicons.css';
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background-color: var(--p-content-background);
+  color: var(--p-text-color);
+}
+
+// PrimeNG Menu adds this class to router-linked items matching the current URL.
+.p-menu-item-link-active {
+  background-color: var(--p-highlight-background);
+  color: var(--p-highlight-color);
+  border-radius: var(--p-menu-item-border-radius);
+}
