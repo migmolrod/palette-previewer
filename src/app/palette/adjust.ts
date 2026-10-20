@@ -37,3 +37,7 @@ export function tint(color: Oklch, tintColor: Oklch, amount: number): Oklch {
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
+
+export function isNoAdjustment(a: Adjustment): boolean {
+  return a.lightness === 0 && a.chroma === 0 && a.hue === 0;
+}

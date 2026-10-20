@@ -32,14 +32,28 @@ describe('generateFromAccent', () => {
     expect(palette.background.l).toBeLessThan(palette.foreground.l);
   });
 
-  it('should apply per-slot overrides on top of global adjustments', () => {
-    const base = generateFromAccent(DEFAULT_ACCENT_PARAMS).palette.color1;
-    const { palette } = generateFromAccent({
+  // Hue checks are loose: gamut mapping nudges hue by a couple of degrees.
+  it('should apply global, neutral and per-ramp adjustments to the ramps', () => {
+    const base = generateFromAccent(DEFAULT_ACCENT_PARAMS);
+    const result = generateFromAccent({
       ...DEFAULT_ACCENT_PARAMS,
-      global: { lightness: -0.1, chroma: 0, hue: 0 },
-      slots: { color1: { lightness: 0.05 } },
+      global: { lightness: 0, chroma: 0, hue: 20 },
+      neutral: { lightness: -0.05, chroma: 0, hue: 0 },
+      ramps: { red: { lightness: 0, chroma: 0, hue: 10 } },
     });
-    expect(palette.color1.l).toBeCloseTo(base.l - 0.05, 2);
+    expect(result.accentRamp[500].h).toBeCloseTo(base.accentRamp[500].h! + 20, -1);
+    expect(result.hueRamps.green[500].h).toBeCloseTo(base.hueRamps.green[500].h! + 20, -1);
+    expect(result.hueRamps.red[500].h).toBeCloseTo(base.hueRamps.red[500].h! + 30, -1);
+    expect(result.neutralRamp[950].l).toBeCloseTo(base.neutralRamp[950].l - 0.05, 2);
+  });
+
+  it('should take terminal slots from the finished ramps', () => {
+    const result = generateFromAccent({
+      ...DEFAULT_ACCENT_PARAMS,
+      ramps: { red: { lightness: 0.05, chroma: 0, hue: 0 } },
+    });
+    expect(result.palette.color1).toEqual(result.hueRamps.red[400]);
+    expect(result.palette.background).toEqual(result.neutralRamp[950]);
   });
 
   it('should tint neutrals towards the tint color', () => {

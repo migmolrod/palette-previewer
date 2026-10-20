@@ -7,14 +7,13 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import type { Adjustment } from '../../palette/adjust';
+import { isNoAdjustment, type Adjustment } from '../../palette/adjust';
 import type { Oklch } from '../../palette/color';
-import type { SlotId } from '../../palette/terminal-palette';
 import {
   DEFAULT_ACCENT_PARAMS,
   generateFromAccent,
   type AccentParams,
-  type SlotOverride,
+  type ChromaticRamp,
   type TintSettings,
 } from './generate-from-accent';
 
@@ -27,7 +26,7 @@ export const AccentStore = signalStore(
         accent: store.accent(),
         global: store.global(),
         neutral: store.neutral(),
-        slots: store.slots(),
+        ramps: store.ramps(),
         tint: store.tint(),
       }),
     ),
@@ -42,20 +41,11 @@ export const AccentStore = signalStore(
     setNeutral(neutral: Partial<Adjustment>): void {
       patchState(store, (state) => ({ neutral: { ...state.neutral, ...neutral } }));
     },
-    /** Replaces a slot's override; zero offsets are dropped and an empty override removes it. */
-    setSlot(id: SlotId, override: SlotOverride): void {
-      const cleaned = Object.fromEntries(
-        Object.entries(override).filter(([, value]) => value !== undefined && value !== 0),
-      ) as SlotOverride;
+    /** Replaces one ramp's fine-tuning; an all-zero adjustment removes it. */
+    setRamp(name: ChromaticRamp, adjustment: Adjustment): void {
       patchState(store, (state) => {
-        const { [id]: _previous, ...slots } = state.slots;
-        return { slots: Object.keys(cleaned).length > 0 ? { ...slots, [id]: cleaned } : slots };
-      });
-    },
-    resetSlot(id: SlotId): void {
-      patchState(store, (state) => {
-        const { [id]: _removed, ...slots } = state.slots;
-        return { slots };
+        const { [name]: _previous, ...ramps } = state.ramps;
+        return { ramps: isNoAdjustment(adjustment) ? ramps : { ...ramps, [name]: adjustment } };
       });
     },
     setTint(tint: Partial<TintSettings>): void {

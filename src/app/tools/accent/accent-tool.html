@@ -2,7 +2,7 @@
 
 <div class="workspace">
   <aside class="controls" aria-label="Palette controls">
-    <p-fieldset legend="Accent">
+    <p-fieldset legend="Accent" toggleable>
       <app-color-input
         label="Accent color"
         inputId="accent-color"
@@ -10,28 +10,28 @@
         (colorChange)="store.setAccent($event)"
       />
     </p-fieldset>
-    <p-fieldset legend="Colors">
+    <p-fieldset legend="Colors" toggleable>
       <app-adjustment-controls
         [adjustment]="store.global()"
         (adjustmentChange)="store.setGlobal($event)"
       />
     </p-fieldset>
-    <p-fieldset legend="Neutrals">
+    <p-fieldset legend="Neutrals" toggleable>
       <app-adjustment-controls
         [adjustment]="store.neutral()"
         (adjustmentChange)="store.setNeutral($event)"
       />
     </p-fieldset>
-    <p-fieldset legend="Per slot">
-      <app-slot-controls
-        [(slot)]="selectedSlot"
-        [override]="store.slots()[selectedSlot()] ?? {}"
-        (overrideChange)="store.setSlot(selectedSlot(), $event)"
-        [slots]="store.slots()"
+    <p-fieldset legend="Per ramp" toggleable>
+      <app-ramp-controls
+        [(ramp)]="selectedRamp"
+        [adjustment]="store.ramps()[selectedRamp()] ?? noAdjustment"
+        (adjustmentChange)="store.setRamp(selectedRamp(), $event)"
+        [adjustments]="store.ramps()"
         [result]="store.result()"
       />
     </p-fieldset>
-    <p-fieldset legend="Tint">
+    <p-fieldset legend="Tint" toggleable>
       <app-tint-controls
         [tint]="store.tint()"
         [accent]="store.accent()"
@@ -46,17 +46,7 @@
       <app-terminal-preview [palette]="store.result().palette" />
       <div class="swatches ansi">
         @for (slot of slots; track slot.id) {
-          <button
-            type="button"
-            class="swatch-button"
-            [attr.aria-pressed]="slot.id === selectedSlot()"
-            (click)="selectedSlot.set(slot.id)"
-          >
-            <app-swatch
-              [label]="slot.id in store.slots() ? slot.label + ' · edited' : slot.label"
-              [color]="store.result().palette[slot.id]"
-            />
-          </button>
+          <app-swatch [label]="slot.label" [color]="store.result().palette[slot.id]" />
         }
       </div>
     </section>

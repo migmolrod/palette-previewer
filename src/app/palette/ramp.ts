@@ -45,3 +45,8 @@ export function buildRamp(hue: number, chroma: number): Ramp {
     ]),
   ) as Ramp;
 }
+
+/** Applies `fn` to every stop of a ramp. */
+export function mapRamp(ramp: Ramp, fn: (color: Oklch, stop: Stop) => Oklch): Ramp {
+  return Object.fromEntries(STOPS.map((stop) => [stop, fn(ramp[stop], stop)])) as Ramp;
+}

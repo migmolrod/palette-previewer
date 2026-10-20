@@ -16,17 +16,10 @@ describe('AccentStore', () => {
     expect(store.result().palette.background).not.toEqual(before);
   });
 
-  it('should replace slot overrides and drop zero offsets', () => {
-    store.setSlot('color1', { lightness: 0.1, stop: 500 });
-    store.setSlot('color1', { lightness: 0, chroma: 0, hue: 10 });
-    expect(store.slots().color1).toEqual({ hue: 10 });
-    store.resetSlot('color1');
-    expect(store.slots().color1).toBeUndefined();
-  });
-
-  it('should remove a slot override that has nothing left', () => {
-    store.setSlot('color1', { hue: 10 });
-    store.setSlot('color1', { lightness: 0, chroma: 0, hue: 0 });
-    expect('color1' in store.slots()).toBe(false);
+  it('should set and drop per-ramp adjustments', () => {
+    store.setRamp('red', { lightness: 0, chroma: 0, hue: 10 });
+    expect(store.ramps().red).toEqual({ lightness: 0, chroma: 0, hue: 10 });
+    store.setRamp('red', { lightness: 0, chroma: 0, hue: 0 });
+    expect('red' in store.ramps()).toBe(false);
   });
 });
