@@ -1,7 +1,5 @@
 :host {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: block;
 }
 
 h2,
@@ -16,16 +14,22 @@ h4 {
   text-transform: capitalize;
 }
 
-.accent-input {
+.workspace {
   display: grid;
-  grid-template-columns: auto minmax(0, 20rem);
-  justify-content: start;
-  gap: 0.25rem 0.75rem;
-  align-items: center;
+  grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
 
-  p-colorpicker {
-    grid-row: span 3;
-  }
+.controls,
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.results {
+  gap: 1.5rem;
 }
 
 .swatches {
@@ -41,4 +45,10 @@ h4 {
 .ramp {
   grid-template-columns: repeat(11, minmax(3.5rem, 1fr));
   overflow-x: auto;
+}
+
+@media (max-width: 1023.98px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

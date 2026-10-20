@@ -1,3 +1,4 @@
+import { parseColor } from '../../palette/color';
 import { TestBed } from '@angular/core/testing';
 import { AccentStore } from './accent-store';
 
@@ -9,15 +10,9 @@ describe('AccentStore', () => {
     store = TestBed.inject(AccentStore);
   });
 
-  it('should ignore invalid accent input', () => {
-    const before = store.accentHex();
-    expect(store.setAccent('nope')).toBe(false);
-    expect(store.accentHex()).toBe(before);
-  });
-
   it('should regenerate the palette when the accent changes', () => {
     const before = store.result().palette.background;
-    store.setAccent('#ff8800');
+    store.setAccent(parseColor('#ff8800')!);
     expect(store.result().palette.background).not.toEqual(before);
   });
 

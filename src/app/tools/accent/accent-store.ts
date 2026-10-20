@@ -8,7 +8,7 @@ import {
   withState,
 } from '@ngrx/signals';
 import type { Adjustment } from '../../palette/adjust';
-import { parseColor, toHex } from '../../palette/color';
+import type { Oklch } from '../../palette/color';
 import type { SlotId } from '../../palette/terminal-palette';
 import {
   DEFAULT_ACCENT_PARAMS,
@@ -22,7 +22,6 @@ import {
 export const AccentStore = signalStore(
   withState<AccentParams>(DEFAULT_ACCENT_PARAMS),
   withComputed((store) => ({
-    accentHex: computed(() => toHex(store.accent())),
     result: computed(() =>
       generateFromAccent({
         accent: store.accent(),
@@ -34,13 +33,8 @@ export const AccentStore = signalStore(
     ),
   })),
   withMethods((store) => ({
-    /** Ignores input that is not a valid CSS color; returns whether it was applied. */
-    setAccent(input: string): boolean {
-      const accent = parseColor(input);
-      if (accent) {
-        patchState(store, { accent });
-      }
-      return accent !== undefined;
+    setAccent(accent: Oklch): void {
+      patchState(store, { accent });
     },
     setGlobal(global: Partial<Adjustment>): void {
       patchState(store, (state) => ({ global: { ...state.global, ...global } }));
