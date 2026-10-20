@@ -42,10 +42,15 @@ export const AccentStore = signalStore(
     setNeutral(neutral: Partial<Adjustment>): void {
       patchState(store, (state) => ({ neutral: { ...state.neutral, ...neutral } }));
     },
+    /** Replaces a slot's override; zero offsets are dropped and an empty override removes it. */
     setSlot(id: SlotId, override: SlotOverride): void {
-      patchState(store, (state) => ({
-        slots: { ...state.slots, [id]: { ...state.slots[id], ...override } },
-      }));
+      const cleaned = Object.fromEntries(
+        Object.entries(override).filter(([, value]) => value !== undefined && value !== 0),
+      ) as SlotOverride;
+      patchState(store, (state) => {
+        const { [id]: _previous, ...slots } = state.slots;
+        return { slots: Object.keys(cleaned).length > 0 ? { ...slots, [id]: cleaned } : slots };
+      });
     },
     resetSlot(id: SlotId): void {
       patchState(store, (state) => {

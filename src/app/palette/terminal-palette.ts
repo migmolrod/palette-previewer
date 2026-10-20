@@ -27,3 +27,10 @@ export const ANSI_NAMES = [
 export type TerminalPalette = Readonly<Record<SlotId, Oklch>>;
 
 export const ANSI_SLOTS = ANSI_NAMES.map((_, index) => `color${index}` as `color${AnsiIndex}`);
+
+/** Every slot in display order, with a human-readable label. */
+export const SLOTS: readonly { readonly id: SlotId; readonly label: string }[] = [
+  { id: 'background', label: 'background' },
+  { id: 'foreground', label: 'foreground' },
+  ...ANSI_SLOTS.map((id, index) => ({ id, label: `${id} · ${ANSI_NAMES[index]}` })),
+];

@@ -36,7 +36,21 @@ const NEUTRAL_STOPS = {
   foreground: 200,
 } as const satisfies Partial<Record<SlotId, Stop>>;
 
-type NeutralSlot = keyof typeof NEUTRAL_STOPS;
+export type RampName = 'neutral' | HueName;
+
+/** Where a slot's color comes from before any adjustment. */
+export interface SlotSource {
+  readonly ramp: RampName;
+  readonly stop: Stop;
+}
+
+export const SLOT_SOURCES = Object.fromEntries([
+  ...Object.entries(NEUTRAL_STOPS).map(([id, stop]) => [id, { ramp: 'neutral', stop }]),
+  ...CHROMATIC_SLOTS.flatMap((slot) => [
+    [slot.normal, { ramp: slot.name, stop: NORMAL_STOP }],
+    [slot.bright, { ramp: slot.name, stop: BRIGHT_STOP }],
+  ]),
+]) as Readonly<Record<SlotId, SlotSource>>;
 
 /** Peak chroma of the chromatic ramps and of the (accent-hued) neutral ramp. */
 const SLOT_CHROMA = 0.15;
@@ -99,25 +113,31 @@ export function generateFromAccent(params: AccentParams): AccentResult {
   ) as Record<HueName, Ramp>;
 
   const tintColor = params.tint.color ?? params.accent;
-  const finish = (id: SlotId, ramp: Ramp, defaultStop: Stop, isNeutral: boolean): Oklch => {
+  const finish = (id: SlotId, source: SlotSource): Oklch => {
+    const isNeutral = source.ramp === 'neutral';
     const override = params.slots[id];
-    let color = ramp[override?.stop ?? defaultStop];
+    let color = rampByName({ neutralRamp, hueRamps }, source.ramp)[override?.stop ?? source.stop];
     color = adjust(color, isNeutral ? params.neutral : params.global);
     color = adjust(color, { ...NO_ADJUSTMENT, ...override });
     color = tint(color, tintColor, isNeutral ? params.tint.neutralAmount : params.tint.amount);
     return mapToSrgb(color);
   };
 
-  const palette: Partial<Record<SlotId, Oklch>> = {};
-  for (const [id, stop] of Object.entries(NEUTRAL_STOPS) as [NeutralSlot, Stop][]) {
-    palette[id] = finish(id, neutralRamp, stop, true);
-  }
-  for (const slot of CHROMATIC_SLOTS) {
-    palette[slot.normal] = finish(slot.normal, hueRamps[slot.name], NORMAL_STOP, false);
-    palette[slot.bright] = finish(slot.bright, hueRamps[slot.name], BRIGHT_STOP, false);
-  }
+  const palette = Object.fromEntries(
+    (Object.entries(SLOT_SOURCES) as [SlotId, SlotSource][]).map(([id, source]) => [
+      id,
+      finish(id, source),
+    ]),
+  ) as TerminalPalette;
 
-  return { accentRamp, neutralRamp, hueRamps, palette: palette as TerminalPalette };
+  return { accentRamp, neutralRamp, hueRamps, palette };
+}
+
+export function rampByName(
+  ramps: Pick<AccentResult, 'neutralRamp' | 'hueRamps'>,
+  name: RampName,
+): Ramp {
+  return name === 'neutral' ? ramps.neutralRamp : ramps.hueRamps[name];
 }
 
 /** Chromatic slot whose default hue is closest to the accent's; none for an achromatic accent. */
