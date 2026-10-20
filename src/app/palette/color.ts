@@ -1,5 +1,7 @@
 import {
   formatHex,
+  modeLrgb,
+  wcagContrast,
   modeOklab,
   modeOklch,
   modeRgb,
@@ -15,6 +17,7 @@ import {
  * `culori/fn` ships without color spaces; register only the ones in use so the rest is tree-shaken.
  */
 useMode(modeRgb);
+useMode(modeLrgb); // needed by wcagContrast (relative luminance)
 const oklab = useMode(modeOklab);
 const oklch = useMode(modeOklch);
 
@@ -46,4 +49,9 @@ export function toOklab(color: Oklch): Oklab {
 
 export function toOklch(color: Oklab): Oklch {
   return oklch(color);
+}
+
+/** WCAG 2 contrast ratio (1–21) between two colors, after sRGB gamut mapping. */
+export function contrast(a: Oklch, b: Oklch): number {
+  return wcagContrast(toSrgbGamut(a), toSrgbGamut(b));
 }

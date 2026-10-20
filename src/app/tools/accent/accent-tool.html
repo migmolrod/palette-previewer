@@ -41,6 +41,11 @@
   </aside>
 
   <div class="results">
+    <section aria-labelledby="tokens-heading">
+      <h3 id="tokens-heading">UI tokens</h3>
+      <app-token-preview [tokens]="store.result().tokens" />
+    </section>
+
     <section aria-labelledby="terminal-heading">
       <h3 id="terminal-heading">Terminal palette</h3>
       <app-terminal-preview [palette]="store.result().palette" />

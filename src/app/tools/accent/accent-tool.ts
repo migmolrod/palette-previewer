@@ -4,6 +4,7 @@ import { NO_ADJUSTMENT } from '../../palette/adjust';
 import { STOPS } from '../../palette/ramp';
 import { SLOTS } from '../../palette/terminal-palette';
 import { TerminalPreview } from '../../preview/terminal-preview/terminal-preview';
+import { TokenPreview } from '../../preview/token-preview/token-preview';
 import { AdjustmentControls } from '../../ui/adjustment-controls/adjustment-controls';
 import { ColorInput } from '../../ui/color-input/color-input';
 import { Swatch } from '../../ui/swatch/swatch';
@@ -20,6 +21,7 @@ import { TintControls } from './tint-controls/tint-controls';
     RampControls,
     Swatch,
     TerminalPreview,
+    TokenPreview,
     TintControls,
   ],
   providers: [AccentStore],

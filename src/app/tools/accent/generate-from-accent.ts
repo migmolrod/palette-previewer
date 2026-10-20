@@ -1,7 +1,9 @@
 import { adjust, NO_ADJUSTMENT, tint, type Adjustment } from '../../palette/adjust';
 import { mapToSrgb, type Oklch } from '../../palette/color';
 import { buildRamp, mapRamp, type Ramp, type Stop } from '../../palette/ramp';
+import type { SemanticTokens } from '../../palette/semantic-tokens';
 import type { SlotId, TerminalPalette } from '../../palette/terminal-palette';
+import { buildTokens } from './accent-tokens';
 
 export type HueName = 'red' | 'green' | 'yellow' | 'blue' | 'magenta' | 'cyan';
 
@@ -84,6 +86,7 @@ export interface AccentResult {
   readonly neutralRamp: Ramp;
   readonly hueRamps: Readonly<Record<HueName, Ramp>>;
   readonly palette: TerminalPalette;
+  readonly tokens: SemanticTokens;
 }
 
 export const DEFAULT_ACCENT_PARAMS: AccentParams = {
@@ -132,7 +135,9 @@ export function generateFromAccent(params: AccentParams): AccentResult {
     ]),
   ) as TerminalPalette;
 
-  return { ...result, palette };
+  const tokens = buildTokens((name) => rampByName(result, name));
+
+  return { ...result, palette, tokens };
 }
 
 export function rampByName(

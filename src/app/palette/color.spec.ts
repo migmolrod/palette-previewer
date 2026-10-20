@@ -1,4 +1,4 @@
-import { parseColor, toHex } from './color';
+import { contrast, parseColor, toHex } from './color';
 
 describe('color', () => {
   it('should round-trip a hex color through OKLCH', () => {
@@ -13,5 +13,10 @@ describe('color', () => {
 
   it('should gamut-map out-of-sRGB colors instead of failing', () => {
     expect(toHex({ mode: 'oklch', l: 0.5, c: 0.4, h: 180 })).toMatch(/^#[0-9a-f]{6}$/);
+  });
+
+  it('should compute the WCAG contrast ratio', () => {
+    expect(contrast(parseColor('#000')!, parseColor('#fff')!)).toBeCloseTo(21, 1);
+    expect(contrast(parseColor('#777')!, parseColor('#777')!)).toBeCloseTo(1, 5);
   });
 });
