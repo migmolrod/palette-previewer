@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, master, 'release/**']
+  push:
+    branches: [develop, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Format, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Node and pnpm versions come from mise.toml, same as local development.
+      - uses: jdx/mise-action@v5
+
+      - name: Locate pnpm store
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
+      - run: pnpm install --frozen-lockfile
+
+      # The real key is git-ignored; the empty placeholder is enough to build and test.
+      - name: Provide PrimeUI license placeholder
+        run: cp src/app/primeui-license.example.ts src/app/primeui-license.ts
+
+      - run: pnpm format:check
+      - run: pnpm test --watch=false
+      - run: pnpm build
