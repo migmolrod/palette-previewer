@@ -41,6 +41,11 @@
   </aside>
 
   <div class="results">
+    <section aria-labelledby="ui-heading">
+      <h3 id="ui-heading">UI preview</h3>
+      <app-primeng-preview [palette]="previewPalette()" />
+    </section>
+
     <section aria-labelledby="tokens-heading">
       <h3 id="tokens-heading">UI tokens</h3>
       <app-token-preview [tokens]="store.result().tokens" />

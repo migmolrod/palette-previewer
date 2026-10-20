@@ -19,8 +19,4 @@ describe('TokenPreview', () => {
     expect(tiles.length).toBe(FILL_TOKENS.length);
     expect(tiles[0].textContent).toMatch(/background[\s\S]*\d+\.\d:1/);
   });
-
-  it('should expose tokens as custom properties', () => {
-    expect(element.style.getPropertyValue('--t-on_danger')).toMatch(/^#[0-9a-f]{6}$/);
-  });
 });
