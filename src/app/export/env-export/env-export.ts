@@ -23,7 +23,9 @@ import type { TerminalPalette } from '../../palette/terminal-palette';
       </button>
       <span class="status" role="status">{{ status() }}</span>
     </div>
-    <pre class="file" tabindex="0" [attr.aria-label]="fileName() + ' contents'">{{ file() }}</pre>
+    <pre class="file" role="region" tabindex="0" [attr.aria-label]="fileName() + ' contents'">{{
+      file()
+    }}</pre>
   `,
   styles: `
     :host {
