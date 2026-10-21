@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, master, 'release/**']
+  push:
+    branches: [develop, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Format, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup
+
+      # The real key is git-ignored; the empty placeholder is enough to build and test.
+      - name: Provide PrimeUI license placeholder
+        run: cp src/app/primeui-license.example.ts src/app/primeui-license.ts
+
+      - run: pnpm format:check
+      - run: pnpm test --watch=false
+      - run: pnpm build

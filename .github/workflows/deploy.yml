@@ -1,0 +1,68 @@
+name: Deploy
+
+on:
+  push:
+    # Globs, not regex: plain semver only, pre-releases like v1.2.3-rc.1 do not deploy.
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Check and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup
+
+      - name: Check tag matches package.json version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+
+      # The key may appear in the bundle (PrimeUI license terms), but must not be published in the repository.
+      - name: Provide PrimeUI license
+        env:
+          PRIMEUI_LICENSE: ${{ secrets.PRIMEUI_LICENSE }}
+        run: |
+          if [ -z "$PRIMEUI_LICENSE" ]; then
+            echo "::error::Repository secret PRIMEUI_LICENSE is not set"
+            exit 1
+          fi
+          node -e "process.stdout.write('export const PRIMEUI_LICENSE = ' + JSON.stringify(process.env.PRIMEUI_LICENSE) + ';\n')" \
+            > src/app/primeui-license.ts
+
+      - run: pnpm format:check
+      - run: pnpm test --watch=false
+      - run: pnpm build --base-href /palette-previewer/
+
+      # Pages serves 404.html for unknown paths, so deep links like /tools/accent survive a reload.
+      - name: Add SPA fallback
+        run: cp dist/palette-previewer/browser/index.html dist/palette-previewer/browser/404.html
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/palette-previewer/browser
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
