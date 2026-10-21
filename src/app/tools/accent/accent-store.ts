@@ -60,6 +60,10 @@ export const AccentStore = signalStore(
     setTint(tint: Partial<TintSettings>): void {
       patchState(store, (state) => ({ tint: { ...state.tint, ...tint } }));
     },
+    /** Replaces every param, e.g. with a palette opened from the library. */
+    load(params: AccentParams): void {
+      patchState(store, params);
+    },
     reset(): void {
       patchState(store, DEFAULT_ACCENT_PARAMS);
     },

@@ -2,6 +2,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { DOCUMENT } from '@angular/common';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
+import { downloadText } from '../download';
 import { buildEnvFile, envFileName } from '../../palette/env-file';
 import type { Mode } from '../../palette/mode';
 import type { SemanticTokens } from '../../palette/semantic-tokens';
@@ -74,11 +75,6 @@ export class EnvExport {
   }
 
   protected download(): void {
-    const url = URL.createObjectURL(new Blob([this.file()], { type: 'text/x-shellscript' }));
-    const link = this.document.createElement('a');
-    link.href = url;
-    link.download = this.fileName();
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadText(this.document, this.fileName(), this.file(), 'text/x-shellscript');
   }
 }

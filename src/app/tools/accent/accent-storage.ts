@@ -1,5 +1,6 @@
 import type { Adjustment } from '../../palette/adjust';
 import type { Oklch } from '../../palette/color';
+import { isFiniteNumber, isRecord } from '../../storage/json';
 import {
   CHROMATIC_RAMPS,
   type AccentParams,
@@ -37,10 +38,13 @@ export function saveAccentParams(params: AccentParams): void {
   }
 }
 
-/** Validates an untrusted payload and rebuilds it field by field, dropping anything unknown. */
 function parseStoredParams(value: unknown): AccentParams | null {
   if (!isRecord(value) || value['schemaVersion'] !== ACCENT_SCHEMA_VERSION) return null;
-  const params = value['params'];
+  return parseAccentParams(value['params']);
+}
+
+/** Validates untrusted params and rebuilds them field by field, dropping anything unknown. */
+export function parseAccentParams(params: unknown): AccentParams | null {
   if (!isRecord(params)) return null;
 
   const accent = parseOklch(params['accent']);
@@ -87,14 +91,6 @@ function parseTint(value: unknown): TintSettings | null {
   return isFiniteNumber(amount) && isFiniteNumber(neutralAmount)
     ? { color, amount, neutralAmount }
     : null;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value);
 }
 
 function isChromaticRamp(name: string): name is ChromaticRamp {
