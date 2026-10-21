@@ -17,9 +17,9 @@ describe('AccentStore', () => {
 
   it('should regenerate the palette when the accent changes', () => {
     createStore();
-    const before = store.result().palette.background;
+    const before = store.result().variants.dark.palette.background;
     store.setAccent(parseColor('#ff8800')!);
-    expect(store.result().palette.background).not.toEqual(before);
+    expect(store.result().variants.dark.palette.background).not.toEqual(before);
   });
 
   it('should set and drop per-ramp adjustments', () => {

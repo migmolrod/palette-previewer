@@ -1,6 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { FieldsetModule } from 'primeng/fieldset';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { NO_ADJUSTMENT } from '../../palette/adjust';
+import { MODES, type Mode } from '../../palette/mode';
 import { STOPS } from '../../palette/ramp';
 import { SLOTS } from '../../palette/terminal-palette';
 import { PrimeNgPreview } from '../../preview/primeng-preview/primeng-preview';
@@ -20,8 +23,10 @@ import { TintControls } from './tint-controls/tint-controls';
     AdjustmentControls,
     ColorInput,
     FieldsetModule,
+    FormsModule,
     PrimeNgPreview,
     RampControls,
+    SelectButtonModule,
     Swatch,
     TerminalPreview,
     TokenPreview,
@@ -48,9 +53,22 @@ export class AccentTool {
 
   protected readonly noAdjustment = NO_ADJUSTMENT;
 
+  protected readonly modes = MODES.map((value) => ({
+    label: value === 'dark' ? 'Dark' : 'Light',
+    value,
+  }));
+  /** Mode shown by every preview; both are generated from the same params. */
+  protected readonly mode = signal<Mode>('dark');
+  protected readonly variant = computed(() => this.store.result().variants[this.mode()]);
+
   protected readonly previewPalette = computed<PreviewPalette>(() => {
-    const { accentRamp, neutralRamp, hueRamps, tokens } = this.store.result();
-    return { primary: accentRamp, surface: neutralRamp, ...hueRamps, tokens };
+    const { accentRamp, neutralRamp, hueRamps } = this.store.result();
+    return {
+      primary: accentRamp,
+      surface: neutralRamp,
+      ...hueRamps,
+      tokens: this.variant().tokens,
+    };
   });
 
   /** Ramp edited by the per-ramp controls. */

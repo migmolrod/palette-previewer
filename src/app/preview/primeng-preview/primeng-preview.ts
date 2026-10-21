@@ -9,6 +9,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { TagModule } from 'primeng/tag';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { toHex } from '../../palette/color';
+import type { Mode } from '../../palette/mode';
 import {
   PREVIEW_SCOPE_CLASS,
   PreviewThemeStyle,
@@ -16,7 +17,7 @@ import {
   type PreviewPalette,
 } from './preview-theme';
 
-/** Real PrimeNG components themed with the generated palette (dark only for now). */
+/** Real PrimeNG components themed with the generated palette, in either mode. */
 @Component({
   imports: [
     ButtonModule,
@@ -82,7 +83,6 @@ import {
       display: block;
       padding: 1.5rem;
       border-radius: var(--p-content-border-radius);
-      color-scheme: dark;
     }
 
     p {
@@ -117,10 +117,13 @@ import {
     '[style]': 'variables()',
     '[style.background-color]': 'background()',
     '[style.color]': 'foreground()',
+    // Aura picks its per-scheme values with light-dark(), which follows color-scheme.
+    '[style.color-scheme]': 'mode()',
   },
 })
 export class PrimeNgPreview {
   readonly palette = input.required<PreviewPalette>();
+  readonly mode = input<Mode>('dark');
 
   protected readonly scopeClass = PREVIEW_SCOPE_CLASS;
   protected readonly variables = computed(() => previewVariables(this.palette()));
