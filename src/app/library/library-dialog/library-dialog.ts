@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, computed, inject, model, output, signal } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
-import { downloadText } from '../../export/download';
+import { downloadText, slug } from '../../export/download';
 import { envFileName } from '../../palette/env-file';
 import { MODES } from '../../palette/mode';
 import { Confirmation } from '../confirm-dialog/confirm-dialog';
@@ -257,14 +257,4 @@ function describeImport({ added, updated, unchanged, skipped }: ImportResult): s
   const parts = [`${added} added`, `${updated} updated`, `${unchanged} already up to date`];
   if (skipped) parts.push(`${skipped} unreadable`);
   return `Imported palettes: ${parts.join(', ')}`;
-}
-
-/** File-name-safe form of a palette name. */
-function slug(name: string): string {
-  return (
-    name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '') || 'palette'
-  );
 }
