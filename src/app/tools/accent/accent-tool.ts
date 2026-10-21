@@ -1,8 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { getState } from '@ngrx/signals';
 import { FormsModule } from '@angular/forms';
 import { FieldsetModule } from 'primeng/fieldset';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { EnvExport } from '../../export/env-export/env-export';
+import { PaletteSession } from '../../library/palette-session';
 import { NO_ADJUSTMENT } from '../../palette/adjust';
 import { MODES, type Mode } from '../../palette/mode';
 import { STOPS } from '../../palette/ramp';
@@ -75,4 +77,12 @@ export class AccentTool {
 
   /** Ramp edited by the per-ramp controls. */
   protected readonly selectedRamp = signal<ChromaticRamp>('accent');
+
+  constructor() {
+    const unregister = inject(PaletteSession).register({
+      params: computed(() => getState(this.store)),
+      load: (params) => this.store.load(params),
+    });
+    inject(DestroyRef).onDestroy(unregister);
+  }
 }

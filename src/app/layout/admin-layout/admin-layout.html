@@ -1,21 +1,26 @@
-<p-toolbar class="topbar" [dt]="{ root: { borderRadius: '0' } }">
-  <ng-template #start>
-    <button
-      pButton
-      class="drawer-toggle"
-      iconOnly
-      variant="text"
-      severity="secondary"
-      aria-label="Open navigation"
-      aria-controls="nav-drawer"
-      [attr.aria-expanded]="drawerVisible()"
-      (click)="drawerVisible.set(true)"
-    >
-      <i class="pi pi-bars" aria-hidden="true"></i>
-    </button>
-    <h1 class="brand">Palette Previewer</h1>
-  </ng-template>
-</p-toolbar>
+<header class="topbar">
+  <p-toolbar class="toolbar" [dt]="{ root: { borderRadius: '0' } }">
+    <ng-template #start>
+      <button
+        pButton
+        class="drawer-toggle"
+        iconOnly
+        variant="text"
+        severity="secondary"
+        aria-label="Open navigation"
+        aria-controls="nav-drawer"
+        [attr.aria-expanded]="drawerVisible()"
+        (click)="drawerVisible.set(true)"
+      >
+        <i class="pi pi-bars" aria-hidden="true"></i>
+      </button>
+      <h1 class="brand">Palette Previewer</h1>
+    </ng-template>
+    <ng-template #end>
+      <app-palette-bar />
+    </ng-template>
+  </p-toolbar>
+</header>
 
 <nav class="sidebar" aria-label="Main">
   <p-menu [model]="menu()" [dt]="sidebarMenuTokens" />

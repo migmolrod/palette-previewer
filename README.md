@@ -46,6 +46,20 @@ col.inactive_border = rgba(110, 117, 128, 0.5)
 
 Without the list, `envsubst` would replace `$mainMod` with an empty string.
 
+## Saving palettes
+
+Work in progress is auto-saved in the browser. To keep a palette, **Save** it under a name (Ctrl+S); the top bar
+shows the palette being edited, or a temporary name such as "Untitled teal", with a dot while there are unsaved
+changes. The menu next to it starts a new palette, saves a copy, renames the current one or opens the **Library**.
+
+Saved palettes live in the browser's localStorage, which is per site: the deployed app and `localhost` each have
+their own library. Use **Export all** and **Import** in the library to move palettes between them or to back them up.
+Importing keeps the most recently updated copy of each palette, so re-importing an old backup never overwrites newer
+work.
+
+Each saved palette also stores the env files it exported when saved. If a later version of the generator turns the
+same settings into different colors, the library flags that palette and still offers its original env files.
+
 ## Development server
 
 To start a local development server, run:

@@ -7,6 +7,7 @@ import { DrawerModule } from 'primeng/drawer';
 import { MenuModule } from 'primeng/menu';
 import { ToolbarModule } from 'primeng/toolbar';
 import { filter } from 'rxjs';
+import { PaletteBar } from '../../library/palette-bar/palette-bar';
 
 /**
  * Fixed top bar + sidebar shell; only the content area scrolls.
@@ -14,7 +15,7 @@ import { filter } from 'rxjs';
  * Below the `md` breakpoint the sidebar collapses into a drawer.
  */
 @Component({
-  imports: [ButtonModule, DrawerModule, MenuModule, RouterOutlet, ToolbarModule],
+  imports: [ButtonModule, DrawerModule, MenuModule, PaletteBar, RouterOutlet, ToolbarModule],
   selector: 'app-admin-layout',
   styleUrl: './admin-layout.scss',
   templateUrl: './admin-layout.html',
