@@ -1,14 +1,17 @@
-import { computed } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { computed, effect, inject } from '@angular/core';
 import {
   getState,
   patchState,
   signalStore,
   withComputed,
+  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
 import { isNoAdjustment, type Adjustment } from '../../palette/adjust';
 import type { Oklch } from '../../palette/color';
+import { loadAccentParams, saveAccentParams } from './accent-storage';
 import {
   DEFAULT_ACCENT_PARAMS,
   generateFromAccent,
@@ -17,7 +20,13 @@ import {
   type TintSettings,
 } from './generate-from-accent';
 
-/** Accent tool state: only the parameters; every color is derived from them. */
+/** Quiet time after the last edit before the params are written to storage. */
+export const SAVE_DEBOUNCE_MS = 300;
+
+/**
+ * Accent tool state: only the parameters; every color is derived from them.
+ * The params are restored from localStorage on startup and saved back (debounced) on change.
+ */
 export const AccentStore = signalStore(
   withState<AccentParams>(DEFAULT_ACCENT_PARAMS),
   withComputed((store) => ({
@@ -55,4 +64,33 @@ export const AccentStore = signalStore(
       patchState(store, DEFAULT_ACCENT_PARAMS);
     },
   })),
+  withHooks((store) => {
+    const window = inject(DOCUMENT).defaultView;
+    let pending: ReturnType<typeof setTimeout> | undefined;
+    const save = () => {
+      clearTimeout(pending);
+      pending = undefined;
+      saveAccentParams(getState(store));
+    };
+    /** Writes an edit still waiting for its debounce, so leaving or reloading never drops it. */
+    const flush = () => {
+      if (pending !== undefined) save();
+    };
+    return {
+      onInit(): void {
+        const saved = loadAccentParams();
+        if (saved) patchState(store, saved);
+        effect(() => {
+          getState(store);
+          clearTimeout(pending);
+          pending = setTimeout(save, SAVE_DEBOUNCE_MS);
+        });
+        window?.addEventListener('pagehide', flush);
+      },
+      onDestroy(): void {
+        window?.removeEventListener('pagehide', flush);
+        flush();
+      },
+    };
+  }),
 );
