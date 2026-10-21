@@ -49,9 +49,11 @@ ng test
 Pushing a semver tag (`v1.2.3`) runs `.github/workflows/deploy.yml`, which checks, builds and publishes the app to
 [GitHub Pages](https://migmolrod.github.io/palette-previewer/). Pre-release and other tags do not deploy.
 
-1. `git flow start 1.2.3 release`
-2. `pnpm version 1.2.3 --no-git-tag-version` and commit; the deploy fails if the tag and `package.json` version differ.
-3. `git flow finish 1.2.3 release` merges into `master` and `develop`, tags `v1.2.3` and pushes.
+1. `git flow start 1.2.3 release` creates the branch and commits the `package.json` version bump (git-flow hook).
+2. `git flow finish 1.2.3 release` merges into `master` and `develop`, tags `v1.2.3` and pushes.
+
+Hotfixes work the same way with `hotfix` instead of `release`. The deploy fails if the tag and `package.json` version
+differ.
 
 The deploy needs the `PRIMEUI_LICENSE` repository secret. PrimeUI allows the key in the client bundle, but not
 published in the repository, hence the secret.
