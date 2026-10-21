@@ -2,6 +2,50 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.3.
 
+## Using a palette in your dotfiles
+
+The **Export** section of the accent tool previews, copies or downloads the palette as a shell file, one per mode:
+`palette-dark.sh` and `palette-light.sh`. Both define the same variables, so the same templates render either mode.
+
+Each color comes in three formats:
+
+| Variable          | Example         |
+| ----------------- | --------------- |
+| `$PAL_ACCENT`     | `#6ea4fd`       |
+| `$PAL_ACCENT_HEX` | `6ea4fd`        |
+| `$PAL_ACCENT_RGB` | `110, 164, 253` |
+
+Names are `PAL_` plus the upper-cased token name (`PAL_BACKGROUND`, `PAL_ON_SURFACE`, `PAL_ACCENT_CONTAINER`,
+`PAL_OUTLINE_VARIANT`…) and the terminal slots (`PAL_FOREGROUND`, `PAL_COLOR0`…`PAL_COLOR15`). The terminal background
+is `PAL_BACKGROUND`. These names are a stable API: they are not renamed or removed between releases.
+
+Write each app's config as a template that references the variables, then source the file and render it with
+`envsubst` (from GNU gettext):
+
+```bash
+. ~/.config/palette/palette-dark.sh
+envsubst "$PAL_VARS" < ~/.config/hypr/colors.conf.tpl > ~/.config/hypr/colors.conf
+```
+
+Always pass `"$PAL_VARS"`: it lists every palette variable, so `envsubst` replaces only those and leaves the template's
+own variables alone. For example, this Hyprland template:
+
+```ini
+bind = $mainMod, Q, exec, kitty
+col.active_border = rgb($PAL_ACCENT_HEX)
+col.inactive_border = rgba($PAL_OUTLINE_RGB, 0.5)
+```
+
+renders to:
+
+```ini
+bind = $mainMod, Q, exec, kitty
+col.active_border = rgb(6ea4fd)
+col.inactive_border = rgba(110, 117, 128, 0.5)
+```
+
+Without the list, `envsubst` would replace `$mainMod` with an empty string.
+
 ## Development server
 
 To start a local development server, run:

@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FieldsetModule } from 'primeng/fieldset';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { EnvExport } from '../../export/env-export/env-export';
 import { NO_ADJUSTMENT } from '../../palette/adjust';
 import { MODES, type Mode } from '../../palette/mode';
 import { STOPS } from '../../palette/ramp';
@@ -22,6 +23,7 @@ import { TintControls } from './tint-controls/tint-controls';
   imports: [
     AdjustmentControls,
     ColorInput,
+    EnvExport,
     FieldsetModule,
     FormsModule,
     PrimeNgPreview,
