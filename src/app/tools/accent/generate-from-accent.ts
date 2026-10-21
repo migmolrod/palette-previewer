@@ -41,6 +41,11 @@ const NEUTRAL_STOPS = {
 /** Ramps driven by the Colors adjustment, each with its own fine-tuning on top. */
 export type ChromaticRamp = 'accent' | HueName;
 
+export const CHROMATIC_RAMPS: readonly ChromaticRamp[] = [
+  'accent',
+  ...CHROMATIC_SLOTS.map((slot) => slot.name),
+];
+
 export type RampName = 'neutral' | ChromaticRamp;
 
 /** Where a slot's color comes from before any adjustment. */
