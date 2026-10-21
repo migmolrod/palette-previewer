@@ -20,21 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Node and pnpm versions come from mise.toml, same as local development.
-      - uses: jdx/mise-action@v5
-
-      - name: Locate pnpm store
-        id: pnpm-store
-        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache pnpm store
-        uses: actions/cache@v6
-        with:
-          path: ${{ steps.pnpm-store.outputs.path }}
-          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
-
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
 
       # The real key is git-ignored; the empty placeholder is enough to build and test.
       - name: Provide PrimeUI license placeholder

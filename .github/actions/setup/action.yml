@@ -1,0 +1,23 @@
+name: Set up toolchain
+description: Install Node and pnpm from mise.toml, restore the pnpm store and install dependencies.
+
+runs:
+  using: composite
+  steps:
+    # Node and pnpm versions come from mise.toml, same as local development.
+    - uses: jdx/mise-action@v5
+
+    - name: Locate pnpm store
+      id: pnpm-store
+      shell: bash
+      run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+    - name: Cache pnpm store
+      uses: actions/cache@v6
+      with:
+        path: ${{ steps.pnpm-store.outputs.path }}
+        key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: pnpm-${{ runner.os }}-
+
+    - shell: bash
+      run: pnpm install --frozen-lockfile
