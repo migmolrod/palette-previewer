@@ -5,7 +5,8 @@ import { PrimeNgPreview } from './primeng-preview';
 import { PREVIEW_SCOPE_CLASS, previewVariables, type PreviewPalette } from './preview-theme';
 
 describe('PrimeNgPreview', () => {
-  const { accentRamp, neutralRamp, hueRamps, tokens } = generateFromAccent(DEFAULT_ACCENT_PARAMS);
+  const { accentRamp, neutralRamp, hueRamps, variants } = generateFromAccent(DEFAULT_ACCENT_PARAMS);
+  const { tokens } = variants.dark;
   const palette: PreviewPalette = {
     primary: accentRamp,
     surface: neutralRamp,
@@ -35,6 +36,14 @@ describe('PrimeNgPreview', () => {
       const host = fixture.nativeElement as HTMLElement;
       expect(host.classList).toContain(PREVIEW_SCOPE_CLASS);
       expect(host.style.getPropertyValue('--p-primary-color')).toBe(toHex(tokens.accent));
+    });
+
+    it('should set the color scheme from the mode', async () => {
+      const host = fixture.nativeElement as HTMLElement;
+      expect(host.style.colorScheme).toBe('dark');
+      fixture.componentRef.setInput('mode', 'light');
+      await fixture.whenStable();
+      expect(host.style.colorScheme).toBe('light');
     });
 
     it('should inject the scoped Aura variables once', () => {

@@ -32,6 +32,12 @@ h4 {
   gap: 1.5rem;
 }
 
+.mode {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .swatches {
   display: grid;
   gap: 0.25rem;

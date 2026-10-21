@@ -41,22 +41,34 @@
   </aside>
 
   <div class="results">
+    <div class="mode">
+      <span id="mode-label">Mode</span>
+      <p-selectbutton
+        ariaLabelledBy="mode-label"
+        optionLabel="label"
+        optionValue="value"
+        [options]="modes"
+        [allowEmpty]="false"
+        [(ngModel)]="mode"
+      />
+    </div>
+
     <section aria-labelledby="ui-heading">
       <h3 id="ui-heading">UI preview</h3>
-      <app-primeng-preview [palette]="previewPalette()" />
+      <app-primeng-preview [palette]="previewPalette()" [mode]="mode()" />
     </section>
 
     <section aria-labelledby="tokens-heading">
       <h3 id="tokens-heading">UI tokens</h3>
-      <app-token-preview [tokens]="store.result().tokens" />
+      <app-token-preview [tokens]="variant().tokens" />
     </section>
 
     <section aria-labelledby="terminal-heading">
       <h3 id="terminal-heading">Terminal palette</h3>
-      <app-terminal-preview [palette]="store.result().palette" />
+      <app-terminal-preview [palette]="variant().palette" />
       <div class="swatches ansi">
         @for (slot of slots; track slot.id) {
-          <app-swatch [label]="slot.label" [color]="store.result().palette[slot.id]" />
+          <app-swatch [label]="slot.label" [color]="variant().palette[slot.id]" />
         }
       </div>
     </section>

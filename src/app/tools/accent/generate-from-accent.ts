@@ -1,5 +1,6 @@
 import { adjust, NO_ADJUSTMENT, tint, type Adjustment } from '../../palette/adjust';
 import { mapToSrgb, type Oklch } from '../../palette/color';
+import { forEachMode, type Mode } from '../../palette/mode';
 import { buildRamp, mapRamp, type Ramp, type Stop } from '../../palette/ramp';
 import type { SemanticTokens } from '../../palette/semantic-tokens';
 import type { SlotId, TerminalPalette } from '../../palette/terminal-palette';
@@ -24,19 +25,47 @@ const CHROMATIC_SLOTS: readonly ChromaticSlot[] = [
   { name: 'cyan', hue: 195, normal: 'color6', bright: 'color14' },
 ];
 
-/** Dark theme: normal colors one stop darker than their bright variants. */
-const NORMAL_STOP: Stop = 400;
-const BRIGHT_STOP: Stop = 300;
+type NeutralSlot = 'background' | 'foreground' | 'color0' | 'color7' | 'color8' | 'color15';
 
-/** Dark theme: neutrals taken from both ends of the neutral ramp. */
-const NEUTRAL_STOPS = {
-  background: 950,
-  color0: 900,
-  color8: 600,
-  color7: 300,
-  color15: 100,
-  foreground: 200,
-} as const satisfies Partial<Record<SlotId, Stop>>;
+interface SlotStops {
+  /** Stop of the normal chromatic colors (color1–6). */
+  readonly normal: Stop;
+  /** Stop of their bright variants (color9–14). */
+  readonly bright: Stop;
+  readonly neutral: Readonly<Record<NeutralSlot, Stop>>;
+}
+
+/**
+ * Per mode, the stop each terminal slot takes. Normal colors sit one stop darker than their
+ * bright variants in both modes; neutrals come from opposite ends of the neutral ramp, with
+ * black staying dark and white light so programs that hardcode them keep their meaning.
+ */
+const SLOT_STOPS: Readonly<Record<Mode, SlotStops>> = {
+  dark: {
+    normal: 400,
+    bright: 300,
+    neutral: {
+      background: 950,
+      color0: 900,
+      color8: 600,
+      color7: 300,
+      color15: 100,
+      foreground: 200,
+    },
+  },
+  light: {
+    normal: 700,
+    bright: 600,
+    neutral: {
+      background: 50,
+      color0: 800,
+      color8: 600,
+      color7: 300,
+      color15: 200,
+      foreground: 900,
+    },
+  },
+};
 
 /** Ramps driven by the Colors adjustment, each with its own fine-tuning on top. */
 export type ChromaticRamp = 'accent' | HueName;
@@ -54,13 +83,16 @@ export interface SlotSource {
   readonly stop: Stop;
 }
 
-export const SLOT_SOURCES = Object.fromEntries([
-  ...Object.entries(NEUTRAL_STOPS).map(([id, stop]) => [id, { ramp: 'neutral', stop }]),
-  ...CHROMATIC_SLOTS.flatMap((slot) => [
-    [slot.normal, { ramp: slot.name, stop: NORMAL_STOP }],
-    [slot.bright, { ramp: slot.name, stop: BRIGHT_STOP }],
-  ]),
-]) as Readonly<Record<SlotId, SlotSource>>;
+export const SLOT_SOURCES = forEachMode((mode) => {
+  const stops = SLOT_STOPS[mode];
+  return Object.fromEntries([
+    ...Object.entries(stops.neutral).map(([id, stop]) => [id, { ramp: 'neutral', stop }]),
+    ...CHROMATIC_SLOTS.flatMap((slot) => [
+      [slot.normal, { ramp: slot.name, stop: stops.normal }],
+      [slot.bright, { ramp: slot.name, stop: stops.bright }],
+    ]),
+  ]) as Readonly<Record<SlotId, SlotSource>>;
+});
 
 /** Peak chroma of the chromatic ramps and of the (accent-hued) neutral ramp. */
 const SLOT_CHROMA = 0.15;
@@ -86,12 +118,17 @@ export interface AccentParams {
   readonly tint: TintSettings;
 }
 
+/** What one mode picks from the ramps. */
+export interface PaletteVariant {
+  readonly palette: TerminalPalette;
+  readonly tokens: SemanticTokens;
+}
+
 export interface AccentResult {
   readonly accentRamp: Ramp;
   readonly neutralRamp: Ramp;
   readonly hueRamps: Readonly<Record<HueName, Ramp>>;
-  readonly palette: TerminalPalette;
-  readonly tokens: SemanticTokens;
+  readonly variants: Readonly<Record<Mode, PaletteVariant>>;
 }
 
 export const DEFAULT_ACCENT_PARAMS: AccentParams = {
@@ -105,7 +142,7 @@ export const DEFAULT_ACCENT_PARAMS: AccentParams = {
 /**
  * Accent tool pipeline, applied to whole ramps so every consumer (terminal slots, UI tokens…)
  * sees the same colors: build → global/neutral adjustment → per-ramp adjustment → tint →
- * sRGB gamut mapping. Terminal slots then pick a stop from the finished ramps.
+ * sRGB gamut mapping. Each mode's terminal slots and tokens then pick stops from the finished ramps.
  */
 export function generateFromAccent(params: AccentParams): AccentResult {
   const accentHue = params.accent.h ?? 0;
@@ -132,17 +169,19 @@ export function generateFromAccent(params: AccentParams): AccentResult {
     ]),
   ) as Record<HueName, Ramp>;
 
-  const result = { accentRamp, neutralRamp, hueRamps };
-  const palette = Object.fromEntries(
-    (Object.entries(SLOT_SOURCES) as [SlotId, SlotSource][]).map(([id, source]) => [
-      id,
-      rampByName(result, source.ramp)[source.stop],
-    ]),
-  ) as TerminalPalette;
+  const ramps = { accentRamp, neutralRamp, hueRamps };
+  const rampOf = (name: RampName) => rampByName(ramps, name);
+  const variants = forEachMode((mode) => ({
+    palette: Object.fromEntries(
+      (Object.entries(SLOT_SOURCES[mode]) as [SlotId, SlotSource][]).map(([id, source]) => [
+        id,
+        rampOf(source.ramp)[source.stop],
+      ]),
+    ) as TerminalPalette,
+    tokens: buildTokens(rampOf, mode),
+  }));
 
-  const tokens = buildTokens((name) => rampByName(result, name));
-
-  return { ...result, palette, tokens };
+  return { ...ramps, variants };
 }
 
 export function rampByName(

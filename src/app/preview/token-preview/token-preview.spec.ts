@@ -9,7 +9,10 @@ describe('TokenPreview', () => {
 
   beforeEach(async () => {
     fixture = TestBed.createComponent(TokenPreview);
-    fixture.componentRef.setInput('tokens', generateFromAccent(DEFAULT_ACCENT_PARAMS).tokens);
+    fixture.componentRef.setInput(
+      'tokens',
+      generateFromAccent(DEFAULT_ACCENT_PARAMS).variants.dark.tokens,
+    );
     element = fixture.nativeElement;
     await fixture.whenStable();
   });
