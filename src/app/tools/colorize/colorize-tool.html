@@ -1,0 +1,145 @@
+<h2>Colorize image</h2>
+
+<div class="workspace">
+  <aside class="controls" aria-label="Colorize controls">
+    <p-fieldset legend="Image" toggleable>
+      <div class="stack">
+        <div class="actions">
+          <input #fileInput type="file" accept="image/*" hidden (change)="choose(fileInput)" />
+          <button
+            pButton
+            type="button"
+            severity="secondary"
+            variant="outlined"
+            (click)="fileInput.click()"
+          >
+            <i class="pi pi-upload" pButtonIcon></i>
+            <span pButtonLabel>Choose image</span>
+          </button>
+          <button
+            pButton
+            type="button"
+            [disabled]="!image.hasValue() || exporting()"
+            [loading]="exporting()"
+            (click)="download()"
+          >
+            <i class="pi pi-download" pButtonIcon></i>
+            <span pButtonLabel>Download PNG</span>
+          </button>
+        </div>
+        @if (image.hasValue()) {
+          <p class="hint">
+            {{ image.value().name }} · {{ image.value().width }} × {{ image.value().height }}
+          </p>
+        }
+      </div>
+    </p-fieldset>
+
+    <p-fieldset legend="Palette" toggleable>
+      <div class="stack">
+        <div class="field">
+          <span id="colors-label">Colors</span>
+          <p-selectbutton
+            ariaLabelledBy="colors-label"
+            optionLabel="label"
+            optionValue="value"
+            [options]="colorSets"
+            [allowEmpty]="false"
+            [(ngModel)]="colors"
+          />
+        </div>
+        @if (colors() === 'terminal') {
+          <div class="field">
+            <span id="mode-label">Mode</span>
+            <p-selectbutton
+              ariaLabelledBy="mode-label"
+              optionLabel="label"
+              optionValue="value"
+              [options]="modes"
+              [allowEmpty]="false"
+              [(ngModel)]="mode"
+            />
+          </div>
+        }
+        <p class="hint">{{ colorCount() }} colors</p>
+      </div>
+    </p-fieldset>
+
+    <p-fieldset legend="Method" toggleable>
+      <div class="stack">
+        <div class="field">
+          <span id="method-label" class="sr-only">Method</span>
+          <p-selectbutton
+            ariaLabelledBy="method-label"
+            optionLabel="label"
+            optionValue="value"
+            [options]="methods"
+            [allowEmpty]="false"
+            [(ngModel)]="method"
+          />
+        </div>
+        @if (method() === 'smooth') {
+          <p class="hint">Blends nearby palette colors, keeping gradients smooth.</p>
+          <app-slider-field
+            label="Blend radius"
+            [(value)]="radius"
+            [min]="0.01"
+            [max]="0.2"
+            [step]="0.005"
+            [defaultValue]="defaults.radius"
+            [format]="formatRadius"
+          />
+          <app-slider-field
+            label="Strength"
+            [(value)]="strength"
+            [min]="0"
+            [max]="1"
+            [step]="0.05"
+            [defaultValue]="defaults.strength"
+            [format]="formatPercent"
+          />
+          <div class="switch">
+            <p-toggleswitch inputId="keep-lightness" [(ngModel)]="keepLightness" />
+            <label for="keep-lightness">Keep original lightness</label>
+          </div>
+        } @else {
+          <p class="hint">Snaps every pixel to its nearest palette color. Suits pixel art.</p>
+          <div class="switch">
+            <p-toggleswitch inputId="dither" [(ngModel)]="dither" />
+            <label for="dither">Dithering</label>
+          </div>
+        }
+      </div>
+    </p-fieldset>
+  </aside>
+
+  <section
+    class="results"
+    aria-labelledby="result-heading"
+    [class.dragging]="dragging()"
+    (dragover)="dragOver($event)"
+    (dragleave)="dragging.set(false)"
+    (drop)="dropped($event)"
+  >
+    <h3 id="result-heading">Before and after</h3>
+    <p class="sr-only" role="status">{{ status() }}</p>
+    @if (image.hasValue() && shownPreview(); as after) {
+      <app-image-compare
+        [before]="image.value().url"
+        [after]="after"
+        [width]="image.value().width"
+        [height]="image.value().height"
+      />
+    } @else if (image.isLoading() || preview.isLoading()) {
+      <p class="placeholder">Recoloring…</p>
+    } @else {
+      <p class="placeholder">
+        @if (image.status() === 'error') {
+          That file could not be read as an image.
+        } @else {
+          Choose an image or drop one here.
+        }
+      </p>
+    }
+  </section>
+</div>

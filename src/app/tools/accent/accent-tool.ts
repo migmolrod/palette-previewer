@@ -1,10 +1,8 @@
-import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
-import { getState } from '@ngrx/signals';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FieldsetModule } from 'primeng/fieldset';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { EnvExport } from '../../export/env-export/env-export';
-import { PaletteSession } from '../../library/palette-session';
 import { NO_ADJUSTMENT } from '../../palette/adjust';
 import { MODES, type Mode } from '../../palette/mode';
 import { STOPS } from '../../palette/ramp';
@@ -16,7 +14,7 @@ import { TokenPreview } from '../../preview/token-preview/token-preview';
 import { AdjustmentControls } from '../../ui/adjustment-controls/adjustment-controls';
 import { ColorInput } from '../../ui/color-input/color-input';
 import { Swatch } from '../../ui/swatch/swatch';
-import { AccentStore } from './accent-store';
+import { AccentStore, registerAccentEditor } from './accent-store';
 import type { ChromaticRamp, HueName } from './generate-from-accent';
 import { RampControls } from './ramp-controls/ramp-controls';
 import { TintControls } from './tint-controls/tint-controls';
@@ -79,10 +77,6 @@ export class AccentTool {
   protected readonly selectedRamp = signal<ChromaticRamp>('accent');
 
   constructor() {
-    const unregister = inject(PaletteSession).register({
-      params: computed(() => getState(this.store)),
-      load: (params) => this.store.load(params),
-    });
-    inject(DestroyRef).onDestroy(unregister);
+    registerAccentEditor(this.store);
   }
 }

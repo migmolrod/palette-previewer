@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { computed, effect, inject } from '@angular/core';
+import { computed, DestroyRef, effect, inject } from '@angular/core';
 import {
   getState,
   patchState,
@@ -9,6 +9,7 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
+import { PaletteSession } from '../../library/palette-session';
 import { isNoAdjustment, type Adjustment } from '../../palette/adjust';
 import type { Oklch } from '../../palette/color';
 import { loadAccentParams, saveAccentParams } from './accent-storage';
@@ -98,3 +99,12 @@ export const AccentStore = signalStore(
     };
   }),
 );
+
+/** Makes `store` the palette library's editor for as long as the calling component lives. */
+export function registerAccentEditor(store: InstanceType<typeof AccentStore>): void {
+  const unregister = inject(PaletteSession).register({
+    params: computed(() => getState(store)),
+    load: (params) => store.load(params),
+  });
+  inject(DestroyRef).onDestroy(unregister);
+}
