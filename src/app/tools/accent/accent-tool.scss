@@ -51,6 +51,12 @@ h4 {
 .ramp {
   grid-template-columns: repeat(11, minmax(3.5rem, 1fr));
   overflow-x: auto;
+
+  // Focusable so keyboard users can scroll it.
+  &:focus-visible {
+    outline: var(--p-focus-ring-width) var(--p-focus-ring-style) var(--p-focus-ring-color);
+    outline-offset: var(--p-focus-ring-offset);
+  }
 }
 
 @media (max-width: 1023.98px) {
