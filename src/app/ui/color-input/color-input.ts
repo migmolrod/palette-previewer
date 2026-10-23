@@ -6,13 +6,19 @@ import { parseColor, toHex, type Oklch } from '../../palette/color';
 
 /**
  * Color picker paired with a text field accepting any CSS color.
- * PrimeNG ColorPicker is not screen-reader accessible, so it is hidden from them; the text field is the accessible path.
+ * PrimeNG ColorPicker is not screen-reader accessible, so it is hidden from them and kept out of the tab order;
+ * the text field is the accessible path.
  */
 @Component({
   imports: [ColorPickerModule, FormsModule, InputTextModule],
   selector: 'app-color-input',
   template: `
-    <p-colorpicker aria-hidden="true" [ngModel]="hex()" (ngModelChange)="apply($event)" />
+    <p-colorpicker
+      aria-hidden="true"
+      tabindex="-1"
+      [ngModel]="hex()"
+      (ngModelChange)="apply($event)"
+    />
     <label [for]="inputId()">{{ label() }}</label>
     <input
       pInputText

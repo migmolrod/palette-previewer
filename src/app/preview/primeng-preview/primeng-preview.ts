@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, Directive, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -17,6 +17,13 @@ import {
   type PreviewPalette,
 } from './preview-theme';
 
+/** PrimeNG ProgressBar sets `aria-level` to its value (e.g. "60%"), which is invalid on a progressbar. */
+@Directive({
+  selector: 'p-progressbar',
+  host: { '[attr.aria-level]': 'null' },
+})
+class ProgressBarAriaFix {}
+
 /** Real PrimeNG components themed with the generated palette, in either mode. */
 @Component({
   imports: [
@@ -26,6 +33,7 @@ import {
     FormsModule,
     InputTextModule,
     MessageModule,
+    ProgressBarAriaFix,
     ProgressBarModule,
     TagModule,
     ToggleSwitchModule,

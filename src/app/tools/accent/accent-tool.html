@@ -81,20 +81,20 @@
     <section aria-labelledby="ramps-heading">
       <h3 id="ramps-heading">Ramps</h3>
       <h4>Accent</h4>
-      <div class="swatches ramp">
+      <div class="swatches ramp" role="region" aria-label="Accent ramp" tabindex="0">
         @for (stop of stops; track stop) {
           <app-swatch [label]="'' + stop" [color]="store.result().accentRamp[stop]" />
         }
       </div>
       <h4>Neutral</h4>
-      <div class="swatches ramp">
+      <div class="swatches ramp" role="region" aria-label="Neutral ramp" tabindex="0">
         @for (stop of stops; track stop) {
           <app-swatch [label]="'' + stop" [color]="store.result().neutralRamp[stop]" />
         }
       </div>
       @for (hue of hueNames; track hue) {
         <h4>{{ hue }}</h4>
-        <div class="swatches ramp">
+        <div class="swatches ramp" role="region" tabindex="0" [attr.aria-label]="hue + ' ramp'">
           @for (stop of stops; track stop) {
             <app-swatch [label]="'' + stop" [color]="store.result().hueRamps[hue][stop]" />
           }

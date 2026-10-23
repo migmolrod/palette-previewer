@@ -102,6 +102,22 @@ To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use th
 ng test
 ```
 
+## Accessibility checks
+
+`pnpm a11y` builds the app, serves the production build and runs [axe-core](https://github.com/dequelabs/axe-core)
+(WCAG 2.2 AA and best practices) on every route, once in dark and once in light mode. Any violation fails it, and CI
+runs the same check on every pull request. `pnpm a11y:check` skips the build and scans the existing `dist/`.
+
+It drives a headless Chromium through Playwright; download it once with:
+
+```bash
+pnpm exec playwright install chromium
+```
+
+The scenarios (routes and the states to put them in, such as an uploaded image) live in `scripts/a11y.mts`; add one
+for each new route or state worth scanning. The PrimeNG preview is exempt from the color-contrast rule only: its colors
+come from the palette being edited, not from the app (#16).
+
 ## Releasing
 
 Pushing a semver tag (`v1.2.3`) runs `.github/workflows/deploy.yml`, which checks, builds and publishes the app to

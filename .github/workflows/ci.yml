@@ -29,3 +29,8 @@ jobs:
       - run: pnpm format:check
       - run: pnpm test --watch=false
       - run: pnpm build
+
+      - name: Install Chromium for the accessibility check
+        run: pnpm exec playwright install --with-deps chromium
+
+      - run: pnpm a11y:check
